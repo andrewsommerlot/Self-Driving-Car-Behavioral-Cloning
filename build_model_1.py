@@ -24,14 +24,14 @@ import random
 
 #====================================================================
 # Read in training data 
-# from Udacity class material
+# from Udacity class material, reads in y
 lines = []
 with open('./data/driving_log.csv') as csvfile:
 	reader = csv.reader(csvfile)
 	for line in reader:
 		lines.append(line)
 	
-# from Udacity class material
+# from Udacity class material, reads in X
 images = []
 measurements = []
 for line in lines:
@@ -44,7 +44,7 @@ for line in lines:
 		measurement = float(line[3])
 		measurements.append(measurement)
 
-# from Udacity class material	
+# from Udacity class material, doubles X by making a mirror image of each
 augmented_images, augmented_measurements = [], []
 for image, measurement in zip(images, measurements):
 	augmented_images.append(image)
