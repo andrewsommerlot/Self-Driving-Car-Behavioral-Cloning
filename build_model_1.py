@@ -20,7 +20,7 @@ from keras.optimizers import Adam
 import matplotlib.pyplot as plt
 import pylab
 import random
-#====================================================================
+
 
 #====================================================================
 # Read in training data 
