@@ -166,30 +166,44 @@ del augmented_measurements
 #  Adding one activation function sandwiched between to fully connected linear layers 
 #   provided a more ideal amount of response. 
 # Trained with MSE as loss function and adam optimizer from Keras. 
+
+
 # make data generator for augmented training set 
 from keras.preprocessing.image import ImageDataGenerator
 # source[https://blog.keras.io/building-powerful-image-classification-models-using-very-little-data.html]
 
+
+
 # training generator
 datagen_train = ImageDataGenerator(
-        rotation_range=5,
-        width_shift_range=0.1,
+        featurewise_std_normalization = False,
+        samplewise_std_normalization = False, 
+        rotation_range = 5,
+        width_shift_range=0.05,
+        channel_shift_range = 50,
+        #zca_whitening = True, 
+        #zca_epsilon = 1e-6,
         #height_shift_range=0.1,
         #rescale=1./255,
         #shear_range=0.2,
         #zoom_range=0.2,
-        horizontal_flip=True,
+        #horizontal_flip=True,
         fill_mode='constant')
         
 # validation generator      
 datagen_valid = ImageDataGenerator(
+        featurewise_std_normalization = False,
+        samplewise_std_normalization = False, 
         rotation_range=5,
-        width_shift_range=0.1,
+        width_shift_range=0.05,
+        channel_shift_range = 50,
+        #zca_whitening = True, 
+        #zca_epsilon = 1e-6,
         #height_shift_range=0.1,
         #rescale=1./255,
         #shear_range=0.2,
         #zoom_range=0.2,
-        horizontal_flip=True,
+        #horizontal_flip=True,
         fill_mode='constant')
 
 # fit to image groups        
@@ -209,23 +223,26 @@ valid_generator = datagen_valid.flow(X_valid, y_valid, batch_size=32)
 
 #activation = "relu"
 #model.add(Cropping2D(cropping=((70,25), (0,0))))
+#kernel_regularizer = l2(.0001)
 
 # begin model
 model = Sequential()
 model.add(Lambda(lambda x: x/255 - 0.5, input_shape = (75,320,3)))
-model.add(Conv2D(24, (20, 20), strides = (4,4), activation = "relu"))
-model.add(Conv2D(36, (10, 10), strides = (2,2), activation = "relu"))
+model.add(Conv2D(24, (5, 5), strides = (2,2), activation = "relu"))
+model.add(Conv2D(36, (5, 5), strides = (2,2), activation = "relu"))
 model.add(Conv2D(48, (3, 3), activation = "relu"))
-#model.add(Conv2D(64, (3, 3), activation = "relu"))
+model.add(Conv2D(64, (3, 3), activation = "relu"))
+model.add(Conv2D(64, (3, 3), activation = "relu"))
 model.add(Flatten())
+model.add(Dropout(0.3))
 model.add(Dense(100, kernel_regularizer = l2(.0001)))
 model.add(Dropout(0.2))
 model.add(Dense(25, kernel_regularizer = l2(.0001), activation = "relu"))
 model.add(Dropout(0.2))
-model.add(Dense(10, kernel_regularizer = l2(.0001)))
+model.add(Dense(10))
 model.add(Dropout(0.2))
 model.add(Dense(1))
-adam = Adam(lr = 0.0001)
+adam = Adam(lr = 0.00001)
 model.compile(optimizer = adam, loss='mse')
 # end model 
 #====================================================================
@@ -241,12 +258,13 @@ model.compile(optimizer = adam, loss='mse')
 # run model with fit generator 
 model.fit_generator(
         train_generator,
-        steps_per_epoch= (len(X_train1) / 32),
-        samples_per_epoch = len(X_train1), 
-        epochs=3,
+        #steps_per_epoch= 200,
+        samples_per_epoch = 6000, 
+        epochs=20,
         validation_data = valid_generator,
-        validation_steps = 20)
+        validation_steps = 800)
 
+model.save('model_generator_k2.h5')
 
 #fit_generator(datagen, samples_per_epoch=len(X_train), epochs = 3)
 
@@ -254,6 +272,6 @@ model.fit_generator(
 
 #====================================================================
 # save model and exit,. 
-model.save('model_window_k2.h5')
+model.save('model_generator_k2.h5')
 exit()
 #====================================================================
